@@ -5,13 +5,15 @@ TEMPLATE = lib
 
 DEFINES += PEONYSHARE_LIBRARY
 
+include(../common.pri)
+
 PKGCONFIG += peony
 CONFIG += link_pkgconfig \
           c++11 \
 	  plugin \
 	  debug
 
-DESTDIR += ../../testdir
+#DESTDIR += ../testdir
 
 SOURCES += net-usershare-helper.cpp \
            share-page.cpp \

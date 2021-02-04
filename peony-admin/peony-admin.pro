@@ -1,5 +1,7 @@
 QT += core gui widgets concurrent
 
+include(../common.pri)
+
 TARGET = peony-admin
 TEMPLATE = lib
 
@@ -11,7 +13,8 @@ CONFIG += link_pkgconfig \
 	  plugin \
 	  debug
 
-DESTDIR += ../../testdir
+#DESTDIR += ../testdir
+
 
 PEONY_PATH = "/usr/bin/peony"
 PLUMA_PATH = "/usr/bin/pluma"

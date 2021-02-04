@@ -11,6 +11,8 @@ TEMPLATE = lib
 
 DEFINES += PEONYENGRAMPAMENUPLUGIN_LIBRARY
 
+include(../common.pri)
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -31,7 +33,7 @@ TRANSLATIONS += translations/peony-engrampa-menu_zh_CN.ts \
                 translations/peony-engrampa-menu_cs.ts
 system("lrelease-qt5 translations/*.ts")
 
-DESTDIR += ../../testdir
+#DESTDIR += ../testdir
 
 SOURCES += \
     engrampa-menu-plugin.cpp

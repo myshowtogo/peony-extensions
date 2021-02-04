@@ -16,41 +16,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <https://www.gnu.org/licenses/>.
  *
- * Authors: Yue Lan <lanyue@kylinos.cn>
+ * Authors: tang guang <tangguang@kylinos.cn>
  *
  */
 
-#ifndef ADMINMENUPLUGIN_H
-#define ADMINMENUPLUGIN_H
+#ifndef BLUETOOTHPLUGIN_H
+#define BLUETOOTHPLUGIN_H
 
+#include <file-info.h>
+
+#include "peony-bluetooth-plugin_global.h"
 #include <menu-plugin-iface.h>
 
-#include <QObject>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusConnection>
+#include <QString>
+#include <QStringList>
+#include <QAction>
+#include <QTranslator>
+#include <QLocale>
+#include <QApplication>
+#include <QDebug>
 
 namespace Peony {
 
-class AdminMenuPlugin : public QObject, public MenuPluginInterface
+class PEONYQTENGRAMPAMENUPLUGINSHARED_EXPORT BluetoothPlugin: public QObject, public MenuPluginInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID MenuPluginInterface_iid FILE "common.json")
     Q_INTERFACES(Peony::MenuPluginInterface)
 public:
-    explicit AdminMenuPlugin(QObject *parent = nullptr);
+    explicit BluetoothPlugin(QObject *parent = nullptr);
 
     PluginInterface::PluginType pluginType() override {return PluginInterface::MenuPlugin;}
-    const QString name() override {return "Peony Qt Admin Extension";}
-    const QString description() override {return "Allow user launch file/directory as admin";}
-    const QIcon icon() override {return QIcon::fromTheme("system-users-symbolic");}
+    const QString name() override {return tr("Peony-Qt bluetooth Extension");}
+    const QString description() override {return tr("bluetooth Menu Extension.");}
+    const QIcon icon() override {return QIcon::fromTheme("blueman-tray");}
     void setEnable(bool enable) override {m_enable = enable;}
     bool isEnable() override {return m_enable;}
 
-    QString testPlugin() override {return "";}
+    QString testPlugin() override {return "test compress";}
     QList<QAction *> menuActions(Types types, const QString &uri, const QStringList &selectionUris) override;
 
 private:
-    bool                m_enable;
+    bool m_enable;
 };
 
 }
-
-#endif // ADMINMENUPLUGIN_H
+#endif // BLUETOOTHPLUGIN_H

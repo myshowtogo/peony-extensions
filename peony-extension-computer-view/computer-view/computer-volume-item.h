@@ -25,12 +25,14 @@
 
 #include "abstract-computer-item.h"
 #include <peony-qt/volume-manager.h>
+#include <peony-qt/PeonyFileWatcher>
 
 class ComputerVolumeItem : public AbstractComputerItem
 {
     Q_OBJECT
 public:
     explicit ComputerVolumeItem(GVolume *volume, ComputerModel *model, AbstractComputerItem *parentNode, QObject *parent = nullptr);
+    explicit ComputerVolumeItem(const QString uri,ComputerModel *model,AbstractComputerItem *parentNode,QObject *parent = nullptr);
     ~ComputerVolumeItem();
 
     void updateInfoAsync();
@@ -69,8 +71,18 @@ protected:
 
     //mount op
     static void mount_async_callback(GVolume *volume, GAsyncResult *res, ComputerVolumeItem *p_this);
-    static void unmount_async_callback(GMount *mount, GAsyncResult *res, ComputerVolumeItem *p_this);
+    static void unmount_async_callback(GObject *object, GAsyncResult *res, ComputerVolumeItem *p_this);
     static void eject_async_callback(GObject *object, GAsyncResult *res, ComputerVolumeItem *p_this);
+
+    //watcher
+    void collectInfoWhenGpartedOpen(QString uri);
+    void onFileAdded(const QString &uri);
+    void onFileRemoved(const QString &uri);
+
+    //gparted
+    void findChildrenWhenGPartedOpen();
+    static void enumerate_async_callback(GFile *file, GAsyncResult *res, ComputerVolumeItem *p_this);
+    static void find_children_async_callback(GFileEnumerator *enumerator, GAsyncResult *res, ComputerVolumeItem *p_this);
 
 private Q_SLOTS:
     void onVolumeAdded(const std::shared_ptr<Peony::Volume> volume);
@@ -81,12 +93,16 @@ private:
     std::shared_ptr<Peony::Volume> m_volume;
     std::shared_ptr<Peony::Mount> m_mount;
     GCancellable *m_cancellable;
+    GCancellable *m_tmpCancellable;
 
     //info
     QString m_displayName;
     QIcon m_icon;
     qint64 m_totalSpace = 0;
     qint64 m_usedSpace = 0;
+
+    Peony::FileWatcher *m_watcher = nullptr;
+    QString m_targetUri;
 };
 
 #endif // COMPUTERVOLUMEITEM_H

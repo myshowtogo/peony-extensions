@@ -34,7 +34,7 @@ namespace Peony {
 class SharePropertiesPagePlugin : public QObject, public PropertiesWindowTabPagePluginIface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID PropertiesWindowTabPagePluginIface_iid)
+    Q_PLUGIN_METADATA(IID PropertiesWindowTabPagePluginIface_iid FILE "common.json")
     Q_INTERFACES(Peony::PropertiesWindowTabPagePluginIface)
 public:
     explicit SharePropertiesPagePlugin(QObject *parent = nullptr);
@@ -53,7 +53,7 @@ public:
 
     int tabOrder() override {return 99;}
     bool supportUris(const QStringList &uris) override;
-    QWidget *createTabPage(const QStringList &uris) override;
+    PropertiesWindowTabIface * createTabPage(const QStringList &uris) override;
 
     void closeFactory() {deleteLater();}
 

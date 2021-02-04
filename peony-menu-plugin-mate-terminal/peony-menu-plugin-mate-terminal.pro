@@ -11,6 +11,8 @@ TEMPLATE = lib
 
 DEFINES += PEONYMENUPLUGINMATETERMINAL_LIBRARY
 
+include(../common.pri)
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -25,7 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 PKGCONFIG +=gio-2.0 glib-2.0 gio-unix-2.0 peony
 CONFIG += debug c++11 link_pkgconfig no_keywords plugin
 
-DESTDIR += ../../testdir
+#DESTDIR += ../testdir
 
 SOURCES += \
         mate-terminal-menu-plugin.cpp

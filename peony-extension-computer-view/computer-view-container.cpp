@@ -28,6 +28,7 @@
 
 #include <peony-qt/file-utils.h>
 #include <peony-qt/file-item-model.h>
+#include <peony-qt/connect-to-server-dialog.h>
 #include <peony-qt/file-item-proxy-filter-sort-model.h>
 
 #include <QMenu>
@@ -38,6 +39,10 @@
 #include <QStyleOption>
 #include <QInputDialog>
 #include <QStylePainter>
+
+static void ask_question_cb(GMountOperation *op, char *message, char **choices, Peony::ComputerViewContainer *p_this);
+static void ask_password_cb(GMountOperation *op, const char *message, const char *default_user, const char *default_domain, GAskPasswordFlags flags, Peony::ComputerViewContainer *p_this);
+
 
 static GAsyncReadyCallback mount_enclosing_volume_callback(GFile *volume, GAsyncResult *res, Peony::ComputerViewContainer *p_this)
 {
@@ -87,31 +92,43 @@ Peony::ComputerViewContainer::ComputerViewContainer(QWidget *parent) : Directory
         for (auto index : m_view->selectionModel()->selectedIndexes()) {
             auto item = model->itemFromIndex(index);
             uris<<item->uri();
+            if (item->uri() == "network:///")
+                return;
             items<<item;
         }
 
         if (items.count() == 0) {
             menu.addAction(tr("Connect a server"), [=](){
                 QString uri;
-                LoginRemoteFilesystem* dlg = new LoginRemoteFilesystem;
-                connect(dlg, &QDialog::accept, [=] () {
-                    g_mount_operation_set_username(m_op, dlg->user().toUtf8().constData());
-                    g_mount_operation_set_password(m_op, dlg->password().toUtf8().constData());
-                    g_mount_operation_set_password_save(m_op, G_PASSWORD_SAVE_FOR_SESSION);
-                });
-
+                ConnectServerDialog* dlg = new ConnectServerDialog;
                 dlg->deleteLater();
                 auto code = dlg->exec();
                 if (code == QDialog::Rejected) {
-                    // Exit
                     return;
                 }
+
+                QUrl url = dlg->uri();
+
+                ConnectServerLogin* dlgLogin = new ConnectServerLogin(url.host());
+                dlgLogin->deleteLater();
+                code = dlgLogin->exec();
+                if (code == QDialog::Rejected) {
+                    return;
+                }
+
+                g_mount_operation_set_username(m_op, dlgLogin->user().toUtf8().constData());
+                g_mount_operation_set_password(m_op, dlgLogin->password().toUtf8().constData());
+//                g_mount_operation_set_domain(m_op, dlg->domain().toUtf8().constData());
+                g_mount_operation_set_anonymous(m_op, dlgLogin->anonymous());
+                g_mount_operation_set_password_save(m_op, dlgLogin->savePassword()? G_PASSWORD_SAVE_NEVER: G_PASSWORD_SAVE_FOR_SESSION);
 
                 GFile* m_volume = g_file_new_for_uri(dlg->uri().toUtf8().constData());
                 m_remote_uri = dlg->uri();
                 g_file_mount_enclosing_volume(m_volume, G_MOUNT_MOUNT_NONE, m_op, nullptr, GAsyncReadyCallback(mount_enclosing_volume_callback), this);
+                g_signal_connect (m_op, "ask-question", G_CALLBACK(ask_question_cb), this);
+                g_signal_connect (m_op, "ask-password", G_CALLBACK (ask_password_cb), this);
             });
-        } else if (items.count() == 1 && items.first()->uri() != "") {
+        } else if (items.count() == 1 && items.first()->uri() != "" && items.first()->uri() != "network:///") {
             auto item = items.first();
             bool unmountable = item->canUnmount();
             menu.addAction(tr("Unmount"), [=](){
@@ -144,7 +161,7 @@ Peony::ComputerViewContainer::ComputerViewContainer(QWidget *parent) : Directory
                 }
             });
             a->setEnabled(!uri.isNull());
-        } else if(items.first()->uri() != ""){
+        } else if(items.first()->uri() != "" && items.first()->uri() != "network:///"){
             qDebug() << "unable Property uri:" <<items.first()->uri();
             menu.addAction(tr("Property"));
             menu.actions().first()->setEnabled(false);
@@ -153,6 +170,23 @@ Peony::ComputerViewContainer::ComputerViewContainer(QWidget *parent) : Directory
         menu.exec(QCursor::pos());
     });
 }
+
+static void ask_question_cb(GMountOperation *op, char *message, char **choices, Peony::ComputerViewContainer *p_this)
+{
+    g_mount_operation_reply (op, G_MOUNT_OPERATION_HANDLED);
+}
+
+static void ask_password_cb(GMountOperation *op, const char *message, const char *default_user, const char *default_domain, GAskPasswordFlags flags, Peony::ComputerViewContainer *p_this)
+{
+    Q_UNUSED(message);
+    Q_UNUSED(default_user);
+    Q_UNUSED(default_domain);
+    Q_UNUSED(flags);
+    Q_UNUSED(p_this);
+
+    g_mount_operation_reply (op, G_MOUNT_OPERATION_HANDLED);
+}
+
 
 Peony::ComputerViewContainer::~ComputerViewContainer()
 {
@@ -236,6 +270,8 @@ void Peony::ComputerViewContainer::bindModel(Peony::FileItemModel *model, Peony:
 void Peony::ComputerViewContainer::beginLocationChange()
 {
     Q_EMIT viewDirectoryChanged();
+
+    m_view->refresh();
 }
 
 void Peony::ComputerViewContainer::stopLocationChange()
