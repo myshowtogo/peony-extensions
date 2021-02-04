@@ -19,9 +19,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-TRANSLATIONS = peony-extension-computer-view_zh_CN.ts \
-               peony-extension-computer-view_cs.ts \
-	       peony-extension-computer-view_tr.ts
+TRANSLATIONS += peony-extension-computer-view_zh_CN.ts \
+                peony-extension-computer-view_cs.ts \
+                peony-extension-computer-view_tr.ts
+system("lrelease-qt5 *.ts")
 
 include(computer-view/computer-view.pri)
 

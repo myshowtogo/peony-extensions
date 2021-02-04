@@ -23,7 +23,8 @@ HEADERS += net-usershare-helper.h \
 
 TRANSLATIONS += translations/peony-share-extension_cs.ts \
                 translations/peony-admin-extension_tr.ts \
-		translations/peony-admin-extension_zh_CN.ts
+				translations/peony-admin-extension_zh_CN.ts
+system("lrelease-qt5 translations/*.ts")
 
 RESOURCES += resources.qrc
 

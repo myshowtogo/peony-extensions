@@ -30,7 +30,8 @@ HEADERS += admin-menu-plugin.h
 
 TRANSLATIONS += translations/peony-admin_cs.ts \
                 translations/peony-admin_tr.ts \
-		translations/peony-admin_zh_CN.ts
+				translations/peony-admin_zh_CN.ts
+system("lrelease-qt5 translations/*.ts")
 
 RESOURCES += resources.qrc
 

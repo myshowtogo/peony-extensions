@@ -26,9 +26,10 @@ CONFIG += debug link_pkgconfig plugin
 
 PKGCONFIG += peony
 
-TRANSLATIONS = translations/peony-engrampa-menu_zh_CN.ts \
-               translations/peony-engrampa-menu_tr.ts \
-	       translations/peony-engrampa-menu_cs.ts
+TRANSLATIONS += translations/peony-engrampa-menu_zh_CN.ts \
+                translations/peony-engrampa-menu_tr.ts \
+                translations/peony-engrampa-menu_cs.ts
+system("lrelease-qt5 translations/*.ts")
 
 DESTDIR += ../../testdir
 
