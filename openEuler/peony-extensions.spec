@@ -16,6 +16,7 @@ BuildRequires: libpeony-dev
 BuildRequires: peony
 BuildRequires: poppler-qt5-devel
 BuildRequires: gsettings-qt-devel
+BuildRequires: qt5-linguist
 
 Requires: samba-common-tools
 Requires: samba
